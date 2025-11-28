@@ -15,23 +15,55 @@ function getEnv(name) {
 
 // Build a caption string from the TradingView payload
 function buildCaption(payload) {
+  // Expecting payload like:
+  // {
+  //   "type": "tiktok_alert",
+  //   "symbol": "MESZ2024",
+  //   "limit_low": "4825.25",
+  //   "limit_high_next_open": "4860.75",
+  //   "bar_time": "1732902300000"
+  // }
+
+  const type = payload.type || "tiktok_alert";
   const symbol = payload.symbol || "Unknown symbol";
-  const timeframe = payload.timeframe || "unknown TF";
-  const buy = payload.buy_liquidity;
-  const sell = payload.sell_liquidity;
-  const barTime =
-    typeof payload.bar_time === "number" || typeof payload.bar_time === "string"
-      ? new Date(Number(payload.bar_time)).toISOString()
-      : new Date().toISOString();
+
+  const rawLimitLow = payload.limit_low;
+  const rawLimitHigh = payload.limit_high_next_open;
+
+  // Try to convert to numbers; if not numeric, keep raw strings
+  const numLimitLow = rawLimitLow !== undefined && rawLimitLow !== null && rawLimitLow !== ""
+    ? Number(rawLimitLow)
+    : null;
+  const numLimitHigh = rawLimitHigh !== undefined && rawLimitHigh !== null && rawLimitHigh !== ""
+    ? Number(rawLimitHigh)
+    : null;
+
+  const limitLowStr = numLimitLow != null && !Number.isNaN(numLimitLow)
+    ? numLimitLow.toString()
+    : rawLimitLow != null
+      ? String(rawLimitLow)
+      : "n/a";
+
+  const limitHighStr = numLimitHigh != null && !Number.isNaN(numLimitHigh)
+    ? numLimitHigh.toString()
+    : rawLimitHigh != null
+      ? String(rawLimitHigh)
+      : "n/a";
+
+  // bar_time from TradingView's {{time}} is ms since epoch
+  const barTimeMs = Number(payload.bar_time);
+  const timeStr = !Number.isNaN(barTimeMs)
+    ? new Date(barTimeMs).toISOString()
+    : new Date().toISOString();
 
   const lines = [
-    `New liquidity levels detected on ${symbol} (${timeframe}).`,
-    buy != null ? `• Buy-side liquidity: ${buy}` : null,
-    sell != null ? `• Sell-side liquidity: ${sell}` : null,
-    `Time: ${barTime}`,
+    `TikTok ${type.replace("_", " ").toUpperCase()} for ${symbol}`,
+    `• Limit Low: ${limitLowStr}`,
+    `• Limit High (Next Open): ${limitHighStr}`,
+    `Bar Time: ${timeStr}`,
     "",
-    "#liquidity #orderblocks #tradingview #futures"
-  ].filter(Boolean);
+    "#tradingview #futures #liquidity #tiktoktrading"
+  ];
 
   return lines.join("\n");
 }
