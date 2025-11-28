@@ -1,0 +1,13 @@
+{
+  "name": "tv-tiktok-vercel",
+  "version": "1.0.0",
+  "description": "TradingView webhook -> TikTok poster, Vercel serverless",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}
