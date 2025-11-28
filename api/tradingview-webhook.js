@@ -1,7 +1,7 @@
 // api/tradingview-webhook.js
 
 export const config = {
-  runtime: "nodejs18.x"
+  runtime: "nodejs"
 };
 
 // Helper: get env with basic error if missing
